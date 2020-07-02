@@ -49,7 +49,7 @@ Key Concepts for using Contentstack
 
 **Environment**
 
-    A publishing environment corresponds to one or more deployment servers or a content delivery destination where the entries need to be published. Learn how to work with `Environments <https://www.contentstack.com/docs/developers/set-up-environments)>`_.
+    A publishing environment corresponds to one or more deployment servers or a content delivery destination where the entries need to be published. Learn how to work with `Environments <https://www.contentstack.com/docs/developers/set-up-environments>`_.
 
 
 
