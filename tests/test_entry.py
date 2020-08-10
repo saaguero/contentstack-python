@@ -1,9 +1,10 @@
 import logging
 import unittest
-from tests import credentials
-import HtmlTestRunner
+
+from HtmlTestRunner import HTMLTestRunner
+
 import contentstack
-from contentstack.entryqueryable import Include
+from tests import credentials
 
 global entry_uid
 
@@ -17,7 +18,8 @@ class TestEntry(unittest.TestCase):
         self.stack = contentstack.Stack(self.api_key, self.delivery_token, self.environment)
 
     def test_01_run_initial_query(self):
-        result = self.stack.content_type('faq').query().find()
+        query = self.stack.content_type('faq').query()
+        result = query.find()
         if result is not None:
             global entry_uid
             entry_uid = result['entries'][0]['uid']
@@ -27,7 +29,8 @@ class TestEntry(unittest.TestCase):
 
     def test_02_entry_by_uid(self):
         global entry_uid
-        result = self.stack.content_type('faq').entry(entry_uid).fetch()
+        entry = self.stack.content_type('faq').entry(entry_uid)
+        result = entry.fetch()
         if result is not None:
             logging.info(' => entry result is: {}'.format(result['entry']))
             self.assertEqual('blt53ca1231625bdde4', result['entry']['uid'])
@@ -59,40 +62,36 @@ class TestEntry(unittest.TestCase):
         global entry_uid
         entry = self.stack.content_type('faq').entry(entry_uid).only('field_uid')
         entry.fetch()
-        self.assertEqual({'only[BASE][]': 'field_uid', 'environment': 'development'}, entry.entry_param)
+        self.assertEqual({'environment': 'development', 'only[BASE][]': 'field_uid'}, entry.entry_param)
 
     def test_08_entry_base_excepts(self):
         global entry_uid
         entry = self.stack.content_type('faq').entry(entry_uid).excepts('field_uid')
         entry.fetch()
-        self.assertEqual({'except[BASE][]': 'field_uid', 'environment': 'development'}, entry.entry_param)
-
-    def test_09_entry_base_include_reference_default(self):
-        global entry_uid
-        entry = self.stack.content_type('faq').entry(entry_uid).include_reference(Include.DEFAULT,
-                                                                                  'reference_field_uid')
-        entry.fetch()
-        self.assertEqual({'include[]': 'reference_field_uid', 'environment': 'development'}, entry.entry_param)
+        self.assertEqual({'environment': 'development', 'except[BASE][]': 'field_uid'}, entry.entry_param)
 
     def test_10_entry_base_include_reference_only(self):
         global entry_uid
-        entry = self.stack.content_type('faq').entry(entry_uid) \
-            .include_reference(Include.ONLY, 'reference_field_uid',
-                               field_uid=['field1', 'field2', 'field3'])
+        entry = self.stack.content_type('faq').entry(entry_uid).only('field1')
         entry.fetch()
-        self.assertEqual({'only': {'reference_field_uid': ['field1', 'field2', 'field3']}},
-                         entry.entry_param['include[]'])
+        self.assertEqual({'environment': 'development', 'only[BASE][]': 'field1'},
+                         entry.entry_param)
 
     def test_11_entry_base_include_reference_excepts(self):
         global entry_uid
-        entry = self.stack.content_type('faq').entry(entry_uid) \
-            .include_reference(Include.EXCEPT, 'reference_field_uid',
-                               field_uid=['field1', 'field2', 'field3'])
+        entry = self.stack.content_type('faq').entry(entry_uid).excepts('field1')
         entry.fetch()
-        self.assertEqual({'except': {'reference_field_uid': ['field1', 'field2', 'field3']}},
-                         entry.entry_param['include[]'])
+        self.assertEqual({'environment': 'development', 'except[BASE][]': 'field1'},
+                         entry.entry_param)
+
+    def test_12_entry_include_reference_github_issue(self):
+        stack_for_products = contentstack.Stack("blt02f7b45378b008ee", "cs5b69faf35efdebd91d08bcf4", "production")
+        github_entry = stack_for_products.content_type('product').entry("blte63b2ff6f6414d8e").include_reference(
+            ["categories",
+             "brand"])
+        response = github_entry.fetch()
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestEntry)
-runner = HtmlTestRunner.HTMLTestRunner(combine_reports=True, add_timestamp=False)
+runner = HTMLTestRunner(combine_reports=True, add_timestamp=False)
 runner.run(suite)

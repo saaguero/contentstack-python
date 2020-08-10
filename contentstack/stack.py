@@ -62,7 +62,7 @@ class Stack:
         self.__validate_stack()
 
     def __validate_stack(self):
-        if self.api_key is None or self.api_key == "":
+        if self.api_key is None or self.api_key == '':
             raise PermissionError('You are not permitted to the stack without valid Api Key')
         if self.delivery_token is None or self.delivery_token == "":
             raise PermissionError('You are not permitted to the stack without valid Delivery Token')
@@ -204,8 +204,7 @@ class Stack:
         return self.__sync_request()
 
     def sync_token(self, sync_token):
-        """
-        You can use the sync token (that you receive after initial sync)
+        """You can use the sync token (that you receive after initial sync)
         to get the updated content next time. The sync token fetches
         only the content that was added
         after your last sync, and the details of the content that was deleted or updated.
@@ -247,6 +246,6 @@ class Stack:
         :param kwargs: append queries to the asset URL.
         :return: instance of ImageTransform
         """
-        if image_url == None or image_url == '':
+        if image_url is None or image_url == '':
             raise PermissionError('image_url required for the image_transformation')
         return ImageTransform(self.http_instance, image_url, **kwargs)
